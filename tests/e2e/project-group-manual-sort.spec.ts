@@ -92,7 +92,8 @@ async function seedProjectHeaderSortScenario(
     let repos = findSeededRepos()
     const deadline = Date.now() + 10_000
     while (repos.some((repo) => !repo) && Date.now() < deadline) {
-      await state.fetchRepos()
+      const owner = store.getState().settings?.activeRuntimeEnvironmentId ?? null
+      await state.fetchRepos({ runtimeEnvironmentId: owner })
       repos = findSeededRepos()
       if (repos.every((repo) => repo)) {
         break
@@ -136,7 +137,8 @@ async function seedDuplicateTabOrderProjectGroups(
 
     const groups = []
     for (const name of groupNames) {
-      const created = await state.createProjectGroup(name)
+      // Why: these specs run against the local host.
+      const created = await state.createProjectGroup(name, 'local')
       if (!created) {
         throw new Error(`Failed to create Project Group: ${name}`)
       }
